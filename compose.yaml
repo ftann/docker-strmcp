@@ -1,0 +1,65 @@
+name: strmcp
+
+x-service: &default_service
+  deploy:
+    restart_policy:
+      condition: any
+  environment: &default_service_environment
+    TZ: ${TZ}
+
+x-internal-network: &internal_network
+  driver_opts:
+    com.docker.network.bridge.enable_ip_masquerade: "true" # TODO should be false
+
+services:
+
+  capture:
+    <<: *default_service
+    image: strmcp/capture:${PROXY}
+    build: ./images/capture
+    container_name: capture
+    networks:
+      - proxy
+    environment:
+      <<: *default_service_environment
+      SC_CAPTURE_HOST: proxy
+      SC_CAPTURE_USER_FILE: /run/secrets/capture_user
+      SC_CAPTURE_PASSWORD_FILE: /run/secrets/capture_password
+    volumes:
+      - type: tmpfs
+        target: /tmp/dash
+        tmpfs:
+          size: 2G
+      - type: tmpfs
+        target: /tmp/hls
+        tmpfs:
+          size: 2G
+    secrets:
+      - capture_user
+      - capture_password
+
+  proxy:
+    <<: *default_service
+    image: strmcp/proxy:${PROXY}
+    build: ./images/proxy
+    container_name: proxy
+    networks:
+      - proxy
+    environment:
+      <<: *default_service_environment
+    configs:
+      - proxy
+
+networks:
+  proxy:
+    <<: *internal_network
+
+configs:
+  proxy:
+    file: ./configs/proxy/nginx.conf
+
+secrets:
+  capture_user:
+    file: ./secrets/capture_user
+  capture_password:
+    file: ./secrets/capture_password

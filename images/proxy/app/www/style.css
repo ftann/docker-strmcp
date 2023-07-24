@@ -1,0 +1,18 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    background-color: black;
+}
+
+body {
+    min-height: 100vh;
+}
+
+.video {
+    width: 100%;
+    object-fit: contain;
+}
