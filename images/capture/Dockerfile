@@ -1,16 +1,37 @@
 FROM alpine:3.18.2
 
-ENV SC_CAPTURE_HOST="proxy" \
-    SC_CAPTURE_PORT=9000 \
-    SC_CAPTURE_PATH="/live/1" \
-    SC_CAPTURE_FPS=30 \
-    SC_CAPTURE_RES="1920x1080"
+ARG SC_CAPTURE_DATA="/captures"
+
+EXPOSE 4444
 
 RUN apk add --no-cache \
-    bash chromium chromium-chromedriver firefox ffmpeg tzdata xvfb-run
+    bash firefox ffmpeg pulseaudio pulseaudio-utils xvfb-run tzdata \
+    fontconfig freetype font-ubuntu font-misc-misc && \
+    apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
+    geckodriver
+
+RUN touch /tmp/xvfb.auth && \
+    mkdir -p /tmp/.X11-unix && \
+    chmod 1777 /tmp/.X11-unix
+
+RUN addgroup -g 666 capture && \
+    adduser -D -h /tmp/capture -s /sbin/nologin -G capture -u 666 capture && \
+    mkdir -p ${SC_CAPTURE_DATA} && \
+    chown capture:capture ${SC_CAPTURE_DATA}
+
+USER capture:capture
 
 COPY root/ /
 
-USER nobody:nobody
+ENV SC_CAPTURE_CONTROL_HOST="control" \
+    SC_CAPTURE_FPS=30 \
+    SC_CAPTURE_SCREEN_WIDTH=1280 \
+    SC_CAPTURE_SCREEN_HEIGHT=720 \
+    SC_CAPTURE_TIMING_URL="proxy:8080/time" \
+    SC_CAPTURE_DATA=${SC_CAPTURE_DATA}
+
+VOLUME ${SC_CAPTURE_DATA}
+
+HEALTHCHECK CMD ["/health.sh"]
 
 ENTRYPOINT ["/entrypoint.sh"]

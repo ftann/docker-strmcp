@@ -9,34 +9,54 @@ x-service: &default_service
 
 x-internal-network: &internal_network
   driver_opts:
-    com.docker.network.bridge.enable_ip_masquerade: "true" # TODO should be false
+    com.docker.network.bridge.enable_ip_masquerade: "false"
+
+x-proxy-ingress-network: &proxy_ingress_network proxy_ingress
 
 services:
 
   capture:
     <<: *default_service
-    image: strmcp/capture:${PROXY}
+    image: strmcp/capture:${CAPTURE}
     build: ./images/capture
     container_name: capture
+    shm_size: 1G
+    depends_on:
+      proxy:
+        condition: service_started
     networks:
-      - proxy
+      - capture
+    #    ports:
+    #      - "4444:4444"
     environment:
       <<: *default_service_environment
-      SC_CAPTURE_HOST: proxy
-      SC_CAPTURE_USER_FILE: /run/secrets/capture_user
-      SC_CAPTURE_PASSWORD_FILE: /run/secrets/capture_password
+      SC_CAPTURE_CONTROL_HOST: control
+      SC_CAPTURE_TIMING_URL: proxy:8080/time
+      SC_CAPTURE_SCREEN_WIDTH: ${SCREEN_WIDTH}
+      SC_CAPTURE_SCREEN_HEIGHT: ${SCREEN_HEIGHT}
     volumes:
-      - type: tmpfs
-        target: /tmp/dash
-        tmpfs:
-          size: 2G
-      - type: tmpfs
-        target: /tmp/hls
-        tmpfs:
-          size: 2G
+      - data:/captures:z
+
+  control:
+    <<: *default_service
+    image: strmcp/control:${CONTROL}
+    build: ./images/control
+    container_name: control
+    depends_on:
+      capture:
+        condition: service_healthy
+    networks:
+      - capture
+    environment:
+      <<: *default_service_environment
+      SC_CONTROL_DRIVER_HOST: capture
+      SC_CONTROL_USER_FILE: /run/secrets/control_user
+      SC_CONTROL_PASSWORD_FILE: /run/secrets/control_password
+      SC_CAPTURE_SCREEN_WIDTH: ${SCREEN_WIDTH}
+      SC_CAPTURE_SCREEN_HEIGHT: ${SCREEN_HEIGHT}
     secrets:
-      - capture_user
-      - capture_password
+      - control_user
+      - control_password
 
   proxy:
     <<: *default_service
@@ -44,22 +64,34 @@ services:
     build: ./images/proxy
     container_name: proxy
     networks:
-      - proxy
+      - capture
+      #      - ingress
+    ports:
+      - "8080:8080"
     environment:
       <<: *default_service_environment
-    configs:
-      - proxy
+    volumes:
+      - data:/captures:z,ro
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: *proxy_ingress_network
+      traefik.http.routers.strmcpProxy.rule: "Host(`stream.${DOMAIN}`)"
+      traefik.http.routers.strmcpProxy.entryPoints: "https"
+      traefik.http.routers.strmcpProxy.middlewares: "securedAuth"
+      traefik.http.services.strmcpProxy.loadBalancer.server.port: "8080"
 
 networks:
-  proxy:
+  capture:
     <<: *internal_network
+#  ingress:
+#    external: true
+#    name: *proxy_ingress_network
 
-configs:
-  proxy:
-    file: ./configs/proxy/nginx.conf
+volumes:
+  data:
 
 secrets:
-  capture_user:
-    file: ./secrets/capture_user
-  capture_password:
-    file: ./secrets/capture_password
+  control_user:
+    file: ./secrets/control_user
+  control_password:
+    file: ./secrets/control_password
