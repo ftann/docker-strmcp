@@ -4,10 +4,9 @@
     <meta charset="utf-8"/>
     <title>strmcp</title>
     <link rel="stylesheet" href="style.css">
+    <script src="dash.js"></script>
 </head>
 <body>
-<script src="hls.min.js"></script>
-<video id="video" class="video" controls autoplay></video>
-<script src="script.js"></script>
+<video id="video" class="video" controls data-dashjs-player src="/live/stream.mpd"></video>
 </body>
 </html>

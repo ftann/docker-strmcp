@@ -1,12 +1,21 @@
 FROM alpine:3.18.2
 
-EXPOSE 1935 8080
+EXPOSE 8080
+
+ARG SC_CAPTURE_DATA="/captures"
 
 RUN apk add --no-cache \
-    nginx nginx-mod-rtmp
+    bash envsubst nginx nginx-mod-http-js nginx-mod-rtmp
 
 COPY root/ /
 
-#USER nobody:nobody
+ENV SC_CAPTURE_DATA=${SC_CAPTURE_DATA}
 
-ENTRYPOINT ["/entrypoint.sh"]
+RUN SC_CAPTURE_DATA=${SC_CAPTURE_DATA} envsubst '$SC_CAPTURE_DATA' < /nginx.conf > /nginx.conf.tmp && \
+    mv /nginx.conf.tmp /nginx.conf
+
+HEALTHCHECK CMD ["/health.sh"]
+
+ENTRYPOINT ["/usr/sbin/nginx"]
+
+CMD ["-g", "daemon off;", "-c", "/nginx.conf"]
