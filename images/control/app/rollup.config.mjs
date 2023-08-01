@@ -8,7 +8,6 @@ export default {
     output: {
         file: 'dist/control.js',
         format: 'cjs',
-        sourcemap: true
     },
     plugins: [
         resolve(),
