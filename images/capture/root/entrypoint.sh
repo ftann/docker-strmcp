@@ -94,7 +94,10 @@ ffmpeg \
   "/captures/${SC_CAPTURE_NAME}.mpd" &
 FFMPEG_PID=$!
 
-geckodriver --connect-existing --host 0.0.0.0 --marionette-port 2828 --allow-hosts capture localhost &
+geckodriver --connect-existing \
+  --host 0.0.0.0 --marionette-port 2828 \
+  --log error --log-no-truncate \
+  --allow-hosts "${SC_CAPTURE_CONTROL_HOST}" localhost &
 SELENIUM_PID=$!
 
 function shutdown {
