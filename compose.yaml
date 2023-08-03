@@ -30,7 +30,7 @@ services:
     #      - "4444:4444"
     environment:
       <<: *default_service_environment
-      SC_CAPTURE_CONTROL_HOST: control
+      SC_CAPTURE_CONTROL_HOST: capture
       SC_CAPTURE_TIMING_URL: proxy:8080/time
       SC_CAPTURE_SCREEN_WIDTH: ${SCREEN_WIDTH}
       SC_CAPTURE_SCREEN_HEIGHT: ${SCREEN_HEIGHT}
