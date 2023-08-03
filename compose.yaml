@@ -56,7 +56,7 @@ services:
       SC_CAPTURE_SCREEN_WIDTH: ${SCREEN_WIDTH}
       SC_CAPTURE_SCREEN_HEIGHT: ${SCREEN_HEIGHT}
     secrets:
-      - control_user
+      - control_username
       - control_password
 
   proxy:
@@ -92,7 +92,7 @@ volumes:
   data:
 
 secrets:
-  control_user:
+  control_username:
     file: ./secrets/control_username
   control_password:
     file: ./secrets/control_password
