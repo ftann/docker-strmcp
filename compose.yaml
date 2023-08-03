@@ -45,6 +45,7 @@ services:
     depends_on:
       capture:
         condition: service_healthy
+        restart: true
     networks:
       - capture
     environment:
