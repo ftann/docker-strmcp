@@ -51,7 +51,7 @@ services:
     environment:
       <<: *default_service_environment
       SC_CONTROL_DRIVER_HOST: capture
-      SC_CONTROL_USER_FILE: /run/secrets/control_username
+      SC_CONTROL_USERNAME_FILE: /run/secrets/control_username
       SC_CONTROL_PASSWORD_FILE: /run/secrets/control_password
       SC_CAPTURE_SCREEN_WIDTH: ${SCREEN_WIDTH}
       SC_CAPTURE_SCREEN_HEIGHT: ${SCREEN_HEIGHT}
