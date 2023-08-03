@@ -1,3 +1,4 @@
 .idea
 /docker-strmcp.iml
 node_modules
+secrets/*

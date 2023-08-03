@@ -6,7 +6,7 @@ function createContext() {
         endpoint: {
             host: process.env.SC_CONTROL_DRIVER_HOST,
             port: process.env.SC_CONTROL_DRIVER_PORT,
-            user: process.env.SC_CONTROL_USER,
+            username: process.env.SC_CONTROL_USERNAME,
             password: process.env.SC_CONTROL_PASSWORD,
         },
         screen: {
