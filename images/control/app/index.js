@@ -1,5 +1,5 @@
 import {Builder, Capabilities} from "selenium-webdriver";
-import {video1} from "./flows/example"
+import {video1} from "./flows/video1"
 
 function createContext() {
     return {
