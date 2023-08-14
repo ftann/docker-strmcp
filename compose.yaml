@@ -34,6 +34,8 @@ services:
       SC_CAPTURE_TIMING_URL: proxy:8080/time
       SC_CAPTURE_SCREEN_WIDTH: ${SCREEN_WIDTH}
       SC_CAPTURE_SCREEN_HEIGHT: ${SCREEN_HEIGHT}
+    devices:
+      - /dev/dri:/dev/dri
     volumes:
       - data:/captures:z
 
