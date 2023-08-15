@@ -20,7 +20,7 @@ services:
     image: strmcp/capture:${CAPTURE}
     build: ./images/capture
     container_name: capture
-    shm_size: 1G
+    shm_size: 2G
     depends_on:
       proxy:
         condition: service_started
