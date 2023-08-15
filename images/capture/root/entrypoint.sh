@@ -20,12 +20,14 @@ SC_CAPTURE_USER_AGENT="strmcp-broadcaster-1.0.0"
 DISPLAY=":${SC_CAPTURE_DISPLAY}"
 export DISPLAY
 
+echo "-- start sound server"
 pulseaudio -D --exit-idle-time=-1 --use-pid-file
 PA_PID=$(cat /tmp/pulse-*/pid)
 pacmd load-module module-virtual-sink sink_name=v1
 pacmd set-default-sink v1
 pacmd set-default-source v1.monitor
 
+echo "-- start browser"
 rm -rf /tmp/.X*-lock
 xvfb-run -l -n "${SC_CAPTURE_DISPLAY}" -e /dev/stdout \
   -s "-screen 0 ${SC_CAPTURE_SCREEN_WIDTH}x${SC_CAPTURE_SCREEN_HEIGHT}x24 -fbdir /tmp -ac -listen tcp -noreset +extension RANDR" \
@@ -33,6 +35,7 @@ xvfb-run -l -n "${SC_CAPTURE_DISPLAY}" -e /dev/stdout \
 XVFB_PID=$!
 sleep 2
 
+echo "-- start capturing"
 timestamp="$(date +%s)"
 mkdir -p "${SC_CAPTURE_DATA}/${timestamp}"
 ffmpeg \
@@ -89,6 +92,7 @@ ffmpeg \
   "/captures/${SC_CAPTURE_NAME}.mpd" &
 FFMPEG_PID=$!
 
+echo "-- start web driver"
 geckodriver --connect-existing \
   --host 0.0.0.0 --marionette-port 2828 \
   --log error --log-no-truncate \
