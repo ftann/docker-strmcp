@@ -4,6 +4,7 @@ set -euo pipefail
 
 : "${SC_CAPTURE_CONTROL_HOST?}"
 : "${SC_CAPTURE_FPS?}"
+: "${SC_CAPTURE_RENDER?}"
 : "${SC_CAPTURE_FPS_INPUT:=${SC_CAPTURE_FPS}}"
 : "${SC_CAPTURE_SCREEN_WIDTH?}"
 : "${SC_CAPTURE_SCREEN_HEIGHT?}"
@@ -34,11 +35,9 @@ sleep 2
 
 timestamp="$(date +%s)"
 mkdir -p "${SC_CAPTURE_DATA}/${timestamp}"
-# after -tune
-# -x264-params sliced-threads=0 \
-# for cpu friendly
 ffmpeg \
   -re -hide_banner -loglevel error -nostats \
+  -vaapi_device /dev/dri/renderD128 \
   \
   -f x11grab \
   -s "${SC_CAPTURE_SCREEN_WIDTH}x${SC_CAPTURE_SCREEN_HEIGHT}" -framerate "${SC_CAPTURE_FPS_INPUT}" -draw_mouse 0 -thread_queue_size "${SC_CAPTURE_TQ_SIZE}" \
@@ -50,15 +49,12 @@ ffmpeg \
   \
   -flags +global_header -r "${SC_CAPTURE_FPS}" \
   \
-  -filter_complex "split=2[s0][s1];\
-  [s0]scale=1920x1080[s0];\
-  [s1]scale=1280x720[s1]" \
-  \
   -pix_fmt yuv420p \
-  -c:v libx264 \
+  -vf 'hwupload,scale_vaapi=format=nv12' \
+  -c:v h264_vaapi \
+  -qp 24 \
   \
-  -b:v:0 4500K -maxrate:v:0 4500K -bufsize:v:0 4500K/2 \
-  -b:v:1 3000K -maxrate:v:1 3000K -bufsize:v:1 3000K/2 \
+  -b:v:0 4500K -maxrate:v:0 4500K \
   \
   -g:v "${SC_CAPTURE_FPS}" -keyint_min:v "${SC_CAPTURE_FPS}" -sc_threshold:v 0 \
   \
@@ -66,10 +62,9 @@ ffmpeg \
   \
   -c:a aac -ar 44100 -b:a 128k \
   \
-  -map [s0] -map [s1] \
+  -map 0:v:0 \
   -map 1:a:0 \
   \
-  -preset veryfast \
   -tune zerolatency \
   \
   -adaptation_sets 'id=0,seg_duration=6.006,streams=v id=1,seg_duration=6.006,streams=a' \

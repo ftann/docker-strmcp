@@ -5,10 +5,10 @@ ARG SC_CAPTURE_DATA="/captures"
 EXPOSE 4444
 
 RUN apk add --no-cache \
-    bash firefox ffmpeg pulseaudio pulseaudio-utils xvfb-run tzdata \
+    bash firefox ffmpeg mesa-va-gallium pulseaudio pulseaudio-utils xf86-video-dummy xvfb-run tzdata \
     fontconfig freetype font-ubuntu font-misc-misc && \
     apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
-    geckodriver
+    geckodriver libva-utils
 
 RUN touch /tmp/xvfb.auth && \
     mkdir -p /tmp/.X11-unix && \
@@ -25,6 +25,7 @@ COPY root/ /
 
 ENV SC_CAPTURE_CONTROL_HOST="capture" \
     SC_CAPTURE_FPS=30 \
+    SC_CAPTURE_RENDER="/dev/dri/renderD128" \
     SC_CAPTURE_SCREEN_WIDTH=1280 \
     SC_CAPTURE_SCREEN_HEIGHT=720 \
     SC_CAPTURE_TIMING_URL="proxy:8080/time" \

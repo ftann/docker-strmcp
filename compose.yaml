@@ -20,6 +20,12 @@ services:
     image: strmcp/capture:${CAPTURE}
     build: ./images/capture
     container_name: capture
+    # GIDs found in /dev/dri.
+    # render group must be included.
+    group_add:
+      - "44"
+      - "104"
+      - "105"
     shm_size: 2G
     depends_on:
       proxy:
@@ -32,6 +38,7 @@ services:
       <<: *default_service_environment
       SC_CAPTURE_CONTROL_HOST: capture
       SC_CAPTURE_TIMING_URL: proxy:8080/time
+      SC_CAPTURE_RENDER: ${RENDER}
       SC_CAPTURE_SCREEN_WIDTH: ${SCREEN_WIDTH}
       SC_CAPTURE_SCREEN_HEIGHT: ${SCREEN_HEIGHT}
     devices:
