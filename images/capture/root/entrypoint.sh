@@ -20,20 +20,27 @@ SC_CAPTURE_USER_AGENT="strmcp-broadcaster-1.0.0"
 DISPLAY=":${SC_CAPTURE_DISPLAY}"
 export DISPLAY
 
-echo "-- start sound server"
-pulseaudio -D --exit-idle-time=-1 --use-pid-file
-PA_PID=$(cat /tmp/pulse-*/pid)
-pacmd load-module module-virtual-sink sink_name=v1
-pacmd set-default-sink v1
-pacmd set-default-source v1.monitor
-
 echo "-- start browser"
+XPRA_SESSION_DIR="/tmp"
+XDG_RUNTIME_DIR="/tmp/capture"
+export XPRA_SESSION_DIR XDG_RUNTIME_DIR
 rm -rf /tmp/.X*-lock
-xvfb-run -l -n "${SC_CAPTURE_DISPLAY}" -e /dev/stdout \
-  -s "-screen 0 ${SC_CAPTURE_SCREEN_WIDTH}x${SC_CAPTURE_SCREEN_HEIGHT}x24 -fbdir /tmp -ac -listen tcp -noreset +extension RANDR" \
-  firefox --display="${DISPLAY}" --kiosk --private-window --marionette --remote-debugging-port 9222 &
-XVFB_PID=$!
-sleep 2
+xpra start "${DISPLAY}" --daemon=no \
+  --start-child="firefox --kiosk --private-window --marionette --remote-debugging-port 9222" &
+XPRA_PID=$!
+
+#/usr/bin/Xorg -noreset -nolisten tcp \
+#  +extension GLX +extension RANDR +extension RENDER \
+#  -auth "${XAUTHORITY}" \
+#  -logfile auto/Xorg.${DISPLAY}.log \
+#  -configdir "${HOME}/.xpra/xorg.conf.d" \
+#  -config /etc/xpra/xorg.conf
+
+sleep 3
+
+#xvfb-run -l -n "${SC_CAPTURE_DISPLAY}" -e /dev/stdout \
+#  -s "-screen 0 ${SC_CAPTURE_SCREEN_WIDTH}x${SC_CAPTURE_SCREEN_HEIGHT}x24 -fbdir /tmp -ac -listen tcp -noreset +extension RANDR" \
+#  firefox --display="${DISPLAY}" --kiosk --private-window --marionette --remote-debugging-port 9222 &
 
 echo "-- start capturing"
 timestamp="$(date +%s)"
@@ -100,7 +107,7 @@ geckodriver --connect-existing \
 SELENIUM_PID=$!
 
 function shutdown {
-  kill -s SIGTERM "${FFMPEG_PID}" "${PA_PID}" "${SELENIUM_PID}" "${XVFB_PID}"
+  kill -s SIGTERM "${FFMPEG_PID}" "${SELENIUM_PID}" "${XPRA_PID}"
   wait
 }
 trap shutdown SIGTERM SIGINT

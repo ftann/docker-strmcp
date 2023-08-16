@@ -5,7 +5,7 @@ ARG SC_CAPTURE_DATA="/captures"
 EXPOSE 4444
 
 RUN apk add --no-cache \
-    bash firefox ffmpeg mesa-va-gallium pulseaudio pulseaudio-utils xf86-video-dummy xvfb-run tzdata \
+    bash firefox ffmpeg mesa-va-gallium pulseaudio pulseaudio-utils xpra tzdata \
     fontconfig freetype font-ubuntu font-misc-misc && \
     apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
     geckodriver libva-utils
@@ -16,8 +16,8 @@ RUN touch /tmp/xvfb.auth && \
 
 RUN addgroup -g 666 capture && \
     adduser -D -h /tmp/capture -s /sbin/nologin -G capture -u 666 capture && \
-    mkdir -p ${SC_CAPTURE_DATA} && \
-    chown capture:capture ${SC_CAPTURE_DATA}
+    mkdir -p ${SC_CAPTURE_DATA} /run/xpra && \
+    chown capture:capture ${SC_CAPTURE_DATA} /run/xpra
 
 USER capture:capture
 
