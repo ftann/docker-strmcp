@@ -26,6 +26,7 @@ XDG_RUNTIME_DIR="/tmp/capture"
 export XPRA_SESSION_DIR XDG_RUNTIME_DIR
 rm -rf /tmp/.X*-lock
 xpra start "${DISPLAY}" --daemon=no \
+  --exec-wrapper="vglrun -d egl " \
   --start-child="firefox --kiosk --private-window --marionette --remote-debugging-port 9222" &
 XPRA_PID=$!
 
