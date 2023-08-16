@@ -28,8 +28,8 @@ Xorg -quiet \
 XPRA_PID=$!
 sleep 3
 echo "-- start browser"
-vglrun -d egl \
-  firefox --display="${DISPLAY}" --kiosk --private-window --marionette --remote-debugging-port 9222 &
+#vglrun -d egl \
+firefox --display="${DISPLAY}" --kiosk --private-window --marionette --remote-debugging-port 9222 &
 FF_PID=$!
 
 echo "-- start capturing"
