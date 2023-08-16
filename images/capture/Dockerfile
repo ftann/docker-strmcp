@@ -19,7 +19,7 @@ RUN addgroup -g 666 capture && \
     mkdir -p ${SC_CAPTURE_DATA} && \
     chown capture:capture ${SC_CAPTURE_DATA}
 
-USER capture:capture
+#USER capture:capture
 
 COPY root/ /
 

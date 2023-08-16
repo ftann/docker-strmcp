@@ -20,17 +20,12 @@ SC_CAPTURE_USER_AGENT="strmcp-broadcaster-1.0.0"
 DISPLAY=":${SC_CAPTURE_DISPLAY}"
 export DISPLAY
 
-echo "-- start display server"
+echo "-- start browser"
 rm -rf /tmp/.X*-lock
-Xorg -quiet \
-  -noreset +extension GLX +extension RANDR +extension RENDER \
-  -config /etc/X11/xorg.conf "${DISPLAY}" &
+xpra start "${DISPLAY}" --daemon=no \
+  --start-child="firefox --kiosk --private-window --marionette --remote-debugging-port 9222" &
 XPRA_PID=$!
 sleep 3
-echo "-- start browser"
-#vglrun -d egl \
-firefox --display="${DISPLAY}" --kiosk --private-window --marionette --remote-debugging-port 9222 &
-FF_PID=$!
 
 echo "-- start capturing"
 timestamp="$(date +%s)"
@@ -97,7 +92,7 @@ geckodriver --connect-existing \
 SELENIUM_PID=$!
 
 function shutdown {
-  kill -s SIGTERM "${FFMPEG_PID}" "${SELENIUM_PID}" "${FF_PID}" "${XPRA_PID}"
+  kill -s SIGTERM "${FFMPEG_PID}" "${SELENIUM_PID}" "${XPRA_PID}"
   wait
 }
 trap shutdown SIGTERM SIGINT
