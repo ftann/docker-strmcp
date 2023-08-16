@@ -25,8 +25,8 @@ COPY --from=builder /src/dist/control.js /app/control.js
 
 ENV SC_CONTROL_DRIVER_HOST="capture" \
     SC_CONTROL_DRIVER_PORT=4444 \
-    SC_CAPTURE_SCREEN_WIDTH=1280 \
-    SC_CAPTURE_SCREEN_HEIGHT=720
+    SC_CAPTURE_SCREEN_WIDTH=1920 \
+    SC_CAPTURE_SCREEN_HEIGHT=1080
 
 USER control:control
 
