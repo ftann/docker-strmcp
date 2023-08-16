@@ -20,28 +20,17 @@ SC_CAPTURE_USER_AGENT="strmcp-broadcaster-1.0.0"
 DISPLAY=":${SC_CAPTURE_DISPLAY}"
 export DISPLAY
 
-echo "-- start browser"
-XPRA_SESSION_DIR="/tmp"
-XDG_RUNTIME_DIR="/tmp/capture"
-export XPRA_SESSION_DIR XDG_RUNTIME_DIR
+echo "-- start display server"
 rm -rf /tmp/.X*-lock
-xpra start "${DISPLAY}" --daemon=no \
-  --exec-wrapper="vglrun -d egl " \
-  --start-child="firefox --kiosk --private-window --marionette --remote-debugging-port 9222" &
+Xorg -quiet \
+  -noreset +extension GLX +extension RANDR +extension RENDER \
+  -config /etc/X11/xorg.conf "${DISPLAY}" &
 XPRA_PID=$!
-
-#/usr/bin/Xorg -noreset -nolisten tcp \
-#  +extension GLX +extension RANDR +extension RENDER \
-#  -auth "${XAUTHORITY}" \
-#  -logfile auto/Xorg.${DISPLAY}.log \
-#  -configdir "${HOME}/.xpra/xorg.conf.d" \
-#  -config /etc/xpra/xorg.conf
-
 sleep 3
-
-#xvfb-run -l -n "${SC_CAPTURE_DISPLAY}" -e /dev/stdout \
-#  -s "-screen 0 ${SC_CAPTURE_SCREEN_WIDTH}x${SC_CAPTURE_SCREEN_HEIGHT}x24 -fbdir /tmp -ac -listen tcp -noreset +extension RANDR" \
-#  firefox --display="${DISPLAY}" --kiosk --private-window --marionette --remote-debugging-port 9222 &
+echo "-- start browser"
+vglrun -d egl \
+  firefox --display="${DISPLAY}" --kiosk --private-window --marionette --remote-debugging-port 9222 &
+FF_PID=$!
 
 echo "-- start capturing"
 timestamp="$(date +%s)"
@@ -52,7 +41,7 @@ ffmpeg \
   \
   -f x11grab \
   -s "${SC_CAPTURE_SCREEN_WIDTH}x${SC_CAPTURE_SCREEN_HEIGHT}" -framerate "${SC_CAPTURE_FPS_INPUT}" -draw_mouse 0 -thread_queue_size "${SC_CAPTURE_TQ_SIZE}" \
-  -i ":${SC_CAPTURE_DISPLAY}" \
+  -i "${DISPLAY}" \
   \
   -f pulse \
   -thread_queue_size "${SC_CAPTURE_TQ_SIZE}" \
@@ -108,7 +97,7 @@ geckodriver --connect-existing \
 SELENIUM_PID=$!
 
 function shutdown {
-  kill -s SIGTERM "${FFMPEG_PID}" "${SELENIUM_PID}" "${XPRA_PID}"
+  kill -s SIGTERM "${FFMPEG_PID}" "${SELENIUM_PID}" "${FF_PID}" "${XPRA_PID}"
   wait
 }
 trap shutdown SIGTERM SIGINT
