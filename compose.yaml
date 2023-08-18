@@ -7,10 +7,6 @@ x-service: &default_service
   environment: &default_service_environment
     TZ: ${TZ}
 
-x-internal-network: &internal_network
-  driver_opts:
-    com.docker.network.bridge.enable_ip_masquerade: "false"
-
 services:
 
   capture:
@@ -73,27 +69,15 @@ services:
     container_name: proxy
     networks:
       - capture
-      - ingress
-    #    ports:
-    #      - "8080:8080"
+    ports:
+      - "6666:8080"
     environment:
       <<: *default_service_environment
     volumes:
       - data:/captures:z,ro
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: "${INGRESS_NET}"
-      traefik.http.routers.strmcpProxy.rule: "Host(`${HOST}`)"
-      traefik.http.routers.strmcpProxy.entryPoints: "https"
-      traefik.http.routers.strmcpProxy.middlewares: "securedAuth"
-      traefik.http.services.strmcpProxy.loadBalancer.server.port: "8080"
 
 networks:
   capture:
-    <<: *internal_network
-  ingress:
-    external: true
-    name: "${INGRESS_NET}"
 
 volumes:
   data:
