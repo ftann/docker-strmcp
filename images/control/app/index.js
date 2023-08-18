@@ -1,6 +1,5 @@
 import {Builder, Capabilities} from "selenium-webdriver";
 import {video1} from "./flows/video1"
-import {webgl1} from "./flows/webgl"
 
 function createContext() {
     return {
@@ -34,4 +33,3 @@ async function performFlow(flow) {
 }
 
 performFlow(video1).catch(err => console.log("failed:", err))
-performFlow(webgl1).catch(err => console.log("failed:", err))
