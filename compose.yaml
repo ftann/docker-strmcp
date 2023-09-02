@@ -26,8 +26,6 @@ services:
         condition: service_started
     networks:
       - capture
-    #    ports:
-    #      - "4444:4444"
     environment:
       <<: *default_service_environment
       SC_CAPTURE_CONTROL_HOST: capture
