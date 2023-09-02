@@ -1,0 +1,14 @@
+linters:
+  enable:
+    - gofmt
+    - gosec
+
+linters-settings:
+  gofmt:
+    rewrite-rules:
+      - pattern: 'interface{}'
+        replacement: 'any'
+      - pattern: 'a[b:len(a)]'
+        replacement: 'a[b:]'
+  gosec: { }
+
