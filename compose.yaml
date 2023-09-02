@@ -26,8 +26,6 @@ services:
         condition: service_started
     networks:
       - capture
-    #    ports:
-    #      - "4444:4444"
     environment:
       <<: *default_service_environment
       SC_CAPTURE_CONTROL_HOST: capture
@@ -61,6 +59,8 @@ services:
     secrets:
       - control_username
       - control_password
+    labels:
+      strmcp.trigger.enable: "true"
 
   proxy:
     <<: *default_service
@@ -75,6 +75,16 @@ services:
       <<: *default_service_environment
     volumes:
       - data:/captures:z,ro
+
+  trigger:
+    <<: *default_service
+    image: strmcp/trigger:${TRIGGER}
+    build: ./images/trigger
+    container_name: trigger
+    networks:
+      - capture
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 networks:
   capture:

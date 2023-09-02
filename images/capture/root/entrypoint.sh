@@ -40,7 +40,7 @@ timestamp="$(date +%s)"
 mkdir -p "${SC_CAPTURE_DATA}/${timestamp}"
 ffmpeg \
   -re -hide_banner -loglevel error -nostats \
-  -vaapi_device /dev/dri/renderD128 \
+  -vaapi_device "${SC_CAPTURE_RENDER}" \
   \
   -f x11grab \
   -s "${SC_CAPTURE_SCREEN_WIDTH}x${SC_CAPTURE_SCREEN_HEIGHT}" -framerate "${SC_CAPTURE_FPS_INPUT}" -draw_mouse 0 -thread_queue_size "${SC_CAPTURE_TQ_SIZE}" \
