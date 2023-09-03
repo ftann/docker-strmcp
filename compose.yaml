@@ -62,13 +62,33 @@ services:
     labels:
       strmcp.trigger.enable: "true"
 
+  dns:
+    <<: *default_service
+    image: coredns/coredns:${COREDNS}
+    container_name: dns
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    networks:
+      - capture
+    ports:
+      - "53:53"
+      - "53:53/udp"
+    environment:
+      <<: *default_service_environment
+      DOMAIN: "${DOMAIN}"
+    configs:
+      - source: dns
+        target: /etc/coredns/Corefile
+
   proxy:
     <<: *default_service
     image: strmcp/proxy:${PROXY}
     build: ./images/proxy
     container_name: proxy
     networks:
-      - capture
+      capture:
+        aliases:
+          - "${DOMAIN}"
     ports:
       - "6666:8080"
     environment:
@@ -91,6 +111,10 @@ networks:
 
 volumes:
   data:
+
+configs:
+  dns:
+    file: ./configs/dns/Corefile
 
 secrets:
   control_username:

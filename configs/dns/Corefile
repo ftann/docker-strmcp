@@ -1,0 +1,11 @@
+.:53 {
+    # :8080/health
+    health
+    # log
+    errors
+
+    nsid strmcp
+
+    rewrite name {$DOMAIN} proxy
+    hosts
+}
