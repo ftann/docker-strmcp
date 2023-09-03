@@ -26,6 +26,7 @@ services:
         condition: service_started
     networks:
       - capture
+      - outside
     environment:
       <<: *default_service_environment
       SC_CAPTURE_CONTROL_HOST: capture
@@ -62,24 +63,6 @@ services:
     labels:
       strmcp.trigger.enable: "true"
 
-  dns:
-    <<: *default_service
-    image: coredns/coredns:${COREDNS}
-    container_name: dns
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-    networks:
-      - capture
-    ports:
-      - "53:53"
-      - "53:53/udp"
-    environment:
-      <<: *default_service_environment
-      DOMAIN: "${DOMAIN}"
-    configs:
-      - source: dns
-        target: /etc/coredns/Corefile
-
   proxy:
     <<: *default_service
     image: strmcp/proxy:${PROXY}
@@ -87,10 +70,11 @@ services:
     container_name: proxy
     networks:
       capture:
-        aliases:
-          - "${DOMAIN}"
+      outside:
+      wg:
+        ipv4_address: &proxy_addr 10.66.66.66
     ports:
-      - "6666:8080"
+      - "8080:8080"
     environment:
       <<: *default_service_environment
     volumes:
@@ -106,11 +90,71 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  dns:
+    <<: *default_service
+    image: coredns/coredns:${COREDNS}
+    container_name: dns
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+    networks:
+      wg:
+        ipv4_address: &dns_addr 10.66.66.67
+    environment:
+      <<: *default_service_environment
+      DOMAIN: "${DOMAIN}"
+    configs:
+      - source: dns
+        target: /Corefile
+    profiles:
+      - wg
+
+  wg:
+    <<: *default_service
+    image: weejewel/wg-easy:${WG}
+    container_name: wg
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    networks:
+      # Sorted to get deterministic order of interface names.
+      outside:
+      wg:
+        ipv4_address: 10.66.66.69
+    ports:
+      - "51820:51820/udp"
+      - "51821:51821"
+    environment:
+      <<: *default_service_environment
+      WG_ALLOWED_IPS: 10.66.66.0/23
+      WG_DEFAULT_ADDRESS: 10.66.67.x
+      WG_DEFAULT_DNS: *dns_addr
+      # Prevent access to external networks by routing only internal network (eth1).
+      WG_DEVICE: eth1
+      WG_HOST: "${WG_HOST}"
+      WG_PORT: "${WG_PORT}"
+      PASSWORD: "${WG_PASSWORD}"
+    volumes:
+      - wg:/etc/wireguard
+    sysctls:
+      net.ipv4.conf.all.src_valid_mark: 1
+      net.ipv4.ip_forward: 1
+    profiles:
+      - wg
+
 networks:
   capture:
+    internal: true
+  outside:
+  wg:
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.66.66.0/24
 
 volumes:
   data:
+  wg:
 
 configs:
   dns:
