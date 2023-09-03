@@ -94,14 +94,14 @@ services:
     <<: *default_service
     image: coredns/coredns:${COREDNS}
     container_name: dns
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+    command: "-conf /Corefile"
     networks:
       wg:
         ipv4_address: &dns_addr 10.66.66.67
     environment:
       <<: *default_service_environment
-      DOMAIN: "${DOMAIN}"
+      SC_DOMAIN: "${DOMAIN}"
+      SC_PROXY: *proxy_addr
     configs:
       - source: dns
         target: /Corefile
