@@ -1,6 +1,6 @@
 FROM alpine:3.18.2
 
-EXPOSE 8080
+EXPOSE 80
 
 ARG SC_CAPTURE_DATA="/captures"
 

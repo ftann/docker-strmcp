@@ -30,7 +30,7 @@ services:
     environment:
       <<: *default_service_environment
       SC_CAPTURE_CONTROL_HOST: capture
-      SC_CAPTURE_TIMING_URL: proxy:8080/time
+      SC_CAPTURE_TIMING_URL: proxy/time
       SC_CAPTURE_RENDER: ${RENDER}
       SC_CAPTURE_SCREEN_WIDTH: ${SCREEN_WIDTH}
       SC_CAPTURE_SCREEN_HEIGHT: ${SCREEN_HEIGHT}
@@ -74,7 +74,7 @@ services:
       wg:
         ipv4_address: &proxy_addr 10.66.66.66
     ports:
-      - "8080:8080"
+      - "8080:80"
     environment:
       <<: *default_service_environment
     volumes:

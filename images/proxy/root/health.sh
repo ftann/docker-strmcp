@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-wget -q --spider -T 1 http://localhost:8080 || exit 1
+wget -q --spider -T 1 http://localhost:80 || exit 1
