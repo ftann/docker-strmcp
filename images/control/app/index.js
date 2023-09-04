@@ -1,4 +1,5 @@
-import {Builder, Capabilities} from "selenium-webdriver";
+import {Browser, Builder} from "selenium-webdriver";
+import firefox from "selenium-webdriver/firefox";
 import {video1} from "./flows/video1"
 
 function createContext() {
@@ -19,10 +20,13 @@ function createContext() {
 async function performFlow(flow) {
 
     const context = createContext()
-    const capabilities = Capabilities.firefox();
+    const options = new firefox.Options()
+        .setPreference("media.eme.enabled", true)
+        .setPreference("media.gmp-manager.updateEnabled", true);
     const driver = new Builder()
         .usingServer(`http://${context.endpoint.host}:${context.endpoint.port}`)
-        .withCapabilities(capabilities)
+        .forBrowser(Browser.FIREFOX)
+        .setFirefoxOptions(options)
         .build();
 
     try {
