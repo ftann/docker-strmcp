@@ -12,7 +12,7 @@ body {
     min-height: 100vh;
 }
 
-.video {
+.video-js {
     width: 100%;
     object-fit: contain;
 }

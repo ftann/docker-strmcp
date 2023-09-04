@@ -3,14 +3,13 @@
 <head>
     <meta charset="utf-8"/>
     <title>tv</title>
+    <link rel="stylesheet" href="video-js.min.css">
     <link rel="stylesheet" href="style.css">
-    <script src="dash-4.7.1.js"></script>
+    <script src="video.min.js"></script>
 </head>
 <body>
-<div class="video">
-    <video id="video" autoplay="" preload="none" controls data-dashjs-player>
-        <source src="http://localhost/live/stream.mpd" type="application/dash+xml">
-    </video>
-</div>
+<video id="video" class="video-js" controls data-setup="{}">
+    <source src="/live/stream.mpd" type="application/dash+xml">
+</video>
 </body>
 </html>
