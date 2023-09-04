@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>strmcp</title>
+    <title>tv</title>
     <link rel="stylesheet" href="style.css">
-    <script src="dash.js"></script>
+    <script src="dash-4.7.1.js"></script>
 </head>
 <body>
-<video id="video" class="video" controls data-dashjs-player src="/live/stream.mpd"></video>
+<div class="video">
+    <video id="video" autoplay="" preload="none" controls data-dashjs-player>
+        <source src="http://localhost/live/stream.mpd" type="application/dash+xml">
+    </video>
+</div>
 </body>
 </html>
