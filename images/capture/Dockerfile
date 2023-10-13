@@ -8,7 +8,8 @@ RUN apk add --no-cache \
     bash firefox ffmpeg mesa-va-gallium pulseaudio pulseaudio-utils xf86-video-dummy xvfb-run tzdata \
     fontconfig freetype font-ubuntu font-misc-misc && \
     apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
-    geckodriver libva-utils
+    geckodriver 
+# libva-utils
 
 RUN touch /tmp/xvfb.auth && \
     mkdir -p /tmp/.X11-unix && \
